@@ -11,7 +11,4 @@
 
 #define PORT 8080
 sem_t x, y;
-pthread_t tid;
-pthread_t writerthreads[1000];
-pthread_t readerthreads[1000];
 int readercount = 0;

@@ -56,6 +56,8 @@ void* writer(void* param)
 }
 int main(void)
 {
+    pthread_t writerthreads[1000];
+    pthread_t readerthreads[1000];
     struct sockaddr_in stSockAddr;
     struct sockaddr_storage serverStorage;
     sem_init(&x, 0, 1);
