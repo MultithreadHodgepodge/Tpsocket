@@ -30,7 +30,7 @@ void create_list(list_t **head) {
 void list_add_head(list_t* list, list_t *node){
     CONNECT_PREV_NEXT(node,list)
     list=node;
-    printf("Node is added\n");
+
 }
 
 /**
@@ -42,7 +42,7 @@ void list_add_tail(list_t* list,  list_t *node){
 
     CONNECT_PREV_NEXT(node,list)
     (list)->prev=node;
-    printf("Node is added\n");
+
 
 }
 

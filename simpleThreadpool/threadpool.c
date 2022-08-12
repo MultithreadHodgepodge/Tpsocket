@@ -11,7 +11,6 @@ void readyqueue_init(RQ_t **rq,int rq_capacity, int threadQ)
 	int front, end;
 	sem_t item, remain;
 	pthread_mutex_t mutex;
-	//void *ringbuffer;
 
 	*rq = (RQ_t *)malloc(sizeof(RQ_t));
 	if (*rq == NULL) {
@@ -55,7 +54,7 @@ void* take_task(RQ_t *rq)
 		exit(3);
 	}
 
-	void (*t)();
+	void (*t)(void *);
 	t = NULL;
 
 	sem_wait(&rq->item);
@@ -121,23 +120,25 @@ void add_task(RQ_t *rq, int num)
 /** select_job()-Select Task 
 * @num: decide which jobs is selected 
 */
-
 void* select_job(int num)
 {
+	return factory[num];
 
-	void (*factory[])() = {foo1, foo2, foo3};
-	if (num < 3)
-		return factory[num];
-	else
-		return  factory[0];
 }	
+
+/** set_job()-Set job list 
+* @task: Function pointer to be assigned  
+* @index: The index of the function in function pointer list factory
+*/
+void set_job(void (*task)(void *),int index){
+	factory[index]=task;
+}
 
 /** threadpool_init()- Initialize threadpool
  * @tinfo: contain thread information: tid, thread worker id, jobs pointer ....
  * @rq: Pointer to pointer to RQ_t make worker thread to know the address of readyqueue 
  * @threadQ: Thread number
  */
-
 void threadpool_init(TINFO_t **tinfo, RQ_t **rq,int threadQ)
 {
 	*tinfo = (TINFO_t *)malloc(sizeof(TINFO_t) * threadQ);
@@ -172,7 +173,6 @@ fail:
  * @rq   : threadpool's ringbuffer
  * @tinfo: contain current thread information 
  */
-
 void close_threadpool(RQ_t **rq, TINFO_t **tinfo, int threadQ)
 {
 	void *ret = 0;
@@ -195,7 +195,7 @@ void *worker(void *arg)
 		puts("worker: rq is NULL");
 		exit(4);
 	}
-
+	printf("Worker !!!!\n");
 	void (*t)();
 	t = foo1;
 	while(finish) {
@@ -206,7 +206,7 @@ void *worker(void *arg)
 			
 			break;
 		}
-		t();
+		t(arg);
 	}
 	return t;
 }
@@ -214,7 +214,7 @@ void *worker(void *arg)
 /** interrupt()-Tell process do what
 * @num: tell which asychronize interrupt happend 
 */
-void interrupt(int num)
+static void interrupt(int num)
 {
 	if (num == SIGINT) {
 		int n;
@@ -264,21 +264,21 @@ void interrupt(int num)
 	}
 }
 
-void foo1()
+void foo1(void *para)
 {
 	int c = 5;
 	while (c--)
 		puts("this is foo1");
 }
 
-void foo2()
+void foo2(void *para)
 {
 	int c = 5;
 	while (c--)
 		puts("    this is foo2");
 }
 
-void foo3()
+void foo3(void *para)
 {
 	int c = 5;
 	while (c--)

@@ -51,7 +51,7 @@ int main(int argc,char *argv[])
     int i,choice;
     for(i=0;i<1000;i++){
         choice=rand()%2;
-        choice++;
+
         pthread_create(&tid[i], NULL,
                        clienthread,
                        &choice);

@@ -8,7 +8,7 @@
 #include"../list/list.h"
 typedef struct __task{
 	list_t list;
-	void (*task_func)();
+	void (*task_func)(void *);
 }task_list;
 /*
  * Info about readyqueue 
@@ -27,7 +27,6 @@ typedef struct Readyqueue {
 	int front, end;
 	sem_t item, remain;
 	pthread_mutex_t mutex;
-	void (**ringbuffer)();
 	task_list *task_rq;
 
 }RQ_t;
@@ -49,15 +48,17 @@ typedef struct thread_info {
 
 void threadpool_init(TINFO_t **, RQ_t **,int );
 void readyqueue_init(RQ_t **,int ,int );
-void foo1();
-void foo2();
-void foo3();
+void foo1(void *);
+void foo2(void *);
+void foo3(void *);
 void *worker(void *);
-void interrupt(int );
+static void interrupt(int );
 void close_threadpool(RQ_t **,TINFO_t **,int);
 void add_task(RQ_t *, int );
 void show(RQ_t **);
 void* take_task(RQ_t *);
 RQ_t *sigready_queue;
+void (*factory[])(void *);
+void set_job(void (*)(),int);
 void* select_job(int );
 static int finish = 1;

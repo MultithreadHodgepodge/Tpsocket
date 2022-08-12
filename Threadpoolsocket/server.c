@@ -1,22 +1,19 @@
 #include"server.h"
 
 // Reader Function
-void* reader(void* param)
+void reader(void* param)
 {
-    int *data=(int *)param;
     // Lock the semaphore
     sem_wait(&x);
     readercount++;
- 
-    if (readercount == 1)
-        sem_wait(&y);
+
  
     // Unlock the semaphore
     sem_post(&x);
  
     printf("\n%d reader is inside",
            readercount);
-    printf("\nCurrent counter %d",*data);
+    printf("\nCurrent counter %d",data);
     sleep(5);
  
     // Lock the semaphore
@@ -32,13 +29,12 @@ void* reader(void* param)
  
     printf("\n%d Reader is leaving",
            readercount + 1);
-    pthread_exit(NULL);
+
 }
  
 // Writer Function
-void* writer(void* param)
+void writer(void* param)
 {
-    int *data=(int *)param;
 
     printf("\nWriter is trying to enter");
  
@@ -47,17 +43,28 @@ void* writer(void* param)
  
     printf("\nWriter has entered");
     //Increment Counter
-    *data=*data+1;
+    data=data+1;
     // Unlock the semaphore
     sem_post(&y);
  
     printf("\nWriter is leaving");
-    pthread_exit(NULL);
+
 }
 int main(void)
 {
-    pthread_t writerthreads[1000];
-    pthread_t readerthreads[1000];
+    //Threadpool init
+
+	TINFO_t *tinfo;
+	RQ_t *rq;
+	int rq_capacity=1000;
+	int threadQ=1;
+	readyqueue_init(&rq,rq_capacity,threadQ);
+	threadpool_init(&tinfo, &rq,threadQ);
+    set_job(reader,0);
+	set_job(writer,1);
+
+    //pthread_t writerthreads[1000];
+    //pthread_t readerthreads[1000];
     struct sockaddr_in stSockAddr;
     struct sockaddr_storage serverStorage;
     sem_init(&x, 0, 1);
@@ -91,6 +98,7 @@ int main(void)
     }
     int i=0;
     int counter=0;
+    printf("Start Accepting\n");
     for(;;)
     {
         int addr_size = sizeof(serverStorage);
@@ -106,48 +114,14 @@ int main(void)
         }
         recv(ConnectFD,
              &choice, sizeof(choice), 0);
-
-        if (choice == 0) {
-            // Creater readers thread
-            if (pthread_create(&readerthreads[i++], NULL,
-                               reader, &counter)
-                != 0)
- 
-                // Error in creating thread
-                printf("Failed to create thread\n");
-        }
-        else if (choice == 1) {
-            // Create writers thread
-            if (pthread_create(&writerthreads[i++], NULL,
-                               writer, &counter)
-                != 0)
- 
-                // Error in creating thread
-                printf("Failed to create thread\n");
-        }
-        if (i >= 500) {
-            // Update i
-            i = 0;
- 
-            while (i < 500) {
-                // Suspend execution of
-                // the calling thread
-                // until the target
-                // thread terminates
-                pthread_join(writerthreads[i++],
-                             NULL);
-                pthread_join(readerthreads[i++],
-                             NULL);
-            }
- 
-            // Update i
-            i = 0;
-        }
+        add_task(rq,choice);
+        
+        
         /* perform read write operations ... */
         shutdown(ConnectFD, SHUT_RDWR);
         close(ConnectFD);
     }
- 
+    close_threadpool(&rq,&tinfo,threadQ);
     close(SocketFD);
     return 0;
 }
