@@ -6,6 +6,7 @@ OBJECT_THPOOL=$(OBJ_DIR)test_threadpool.o
 THPOOL_SOURCE=simpleThreadpool/threadpool.c 
 THPOOL_TEST_SOURCE=simpleThreadpool/test_threadpool.c 
 LIST_SOURCE=list/list.c
+RWLOCK_SOURCE=rwlock/rwlock.c
 SERVER_SOURCE=socket/server.c
 SERVER_THPOOL_SOURCE=Threadpoolsocket/server.c
 CLIENT_SOURCE=client.c
@@ -17,16 +18,16 @@ CFLAGS= -pthread -g -O0 -o
 all:mkbuild $(OBJECT_SERVER) $(OBJECT_CLIENT) $(OBJECT_SERVER_THPOOL)
 $(OBJECT_SERVER) : $(SERVER_SOURCE) 
 	$(CC) $(CFLAGS) $@ $^
-$(OBJECT_SERVER_THPOOL): $(SERVER_THPOOL_SOURCE) $(THPOOL_SOURCE) $(LIST_SOURCE)
+$(OBJECT_SERVER_THPOOL): $(SERVER_THPOOL_SOURCE) $(THPOOL_SOURCE) $(LIST_SOURCE) $(RWLOCK_SOURCE)
 	$(CC) $(CFLAGS) $@ $^
 $(OBJECT_CLIENT): $(CLIENT_SOURCE)
 	$(CC) $(CFLAGS) $@ $^
 
 threadpool: mkbuild $(OBJECT_THPOOL)
-$(OBJECT_THPOOL):$(THPOOL_SOURCE) $(THPOOL_TEST_SOURCE) $(LIST_SOURCE)
+$(OBJECT_THPOOL):$(THPOOL_SOURCE) $(THPOOL_TEST_SOURCE) $(LIST_SOURCE) 
 	$(CC) $(CFLAGS) $@ $^
 runserver:
-	./$(OBJECT_SERVER)
+	./$(OBJECT_SERVER_THPOOL)
 runclient:
 	./$(OBJECT_CLIENT)
 mkbuild:

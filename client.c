@@ -26,7 +26,7 @@ void* clienthread(void* args)
         return 0;
     }
  
-    printf("Connection established\n");
+    printf("Connection established %d\n", client_request);
  
     // Send data to the socket
     send(network_socket, &client_request,
@@ -39,6 +39,8 @@ void* clienthread(void* args)
     return 0;
 }
  
+
+#define QUNTITY 1000
 int main(int argc,char *argv[])
 {
     time_t start=time(NULL);
@@ -47,23 +49,34 @@ int main(int argc,char *argv[])
     printf("2. Write\n");
  
     // Input
-    pthread_t tid[1000];
+    pthread_t tid[QUNTITY];
     int i,choice;
-    for(i=0;i<1000;i++){
+    for(i=0;i<QUNTITY;i++){
         choice=rand()%2;
+        
+        if (i % 10) {
+            choice = 1;
+        } else {
+            choice = 0;
+        }
 
         pthread_create(&tid[i], NULL,
                        clienthread,
                        &choice);
     }
     
-    
  
     // Suspend execution of
     // calling thread
-    for(i=0;i<1000;i++)
+    for(i=0;i<QUNTITY;i++)
         pthread_join(tid[i], NULL);
     sleep(5);
+
+    choice = 0;
+    pthread_create(&tid[0], NULL,
+                       clienthread,
+                       &choice);
+    pthread_join(tid[0], NULL);
 
     fprintf(f, "%ld\n", time(NULL)-start);
 

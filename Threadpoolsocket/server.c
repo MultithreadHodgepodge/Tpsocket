@@ -1,34 +1,21 @@
-#include"server.h"
+#include "server.h"
 
 // Reader Function
 void reader(void* param)
 {
-    // Lock the semaphore
-    sem_wait(&x);
-    readercount++;
+    /* cs start */
+    read_lock(datalock);
+    /* cs end */
 
- 
-    // Unlock the semaphore
-    sem_post(&x);
- 
-    printf("\n%d reader is inside",
-           readercount);
     printf("\nCurrent counter %d",data);
     sleep(5);
  
-    // Lock the semaphore
-    sem_wait(&x);
-    readercount--;
- 
-    if (readercount == 0) {
-        sem_post(&y);
-    }
- 
-    // Lock the semaphore
-    sem_post(&x);
- 
+    /* cs start */
+    read_unlock(datalock);
+    /* cs end */
+
     printf("\n%d Reader is leaving",
-           readercount + 1);
+           reader_count + 1);
 
 }
  
@@ -37,19 +24,23 @@ void writer(void* param)
 {
 
     printf("\nWriter is trying to enter");
- 
-    // Lock the semaphore
-    sem_wait(&y);
- 
+    /* cs start */
+    write_lock(datalock);
+    /* cs end */
+
     printf("\nWriter has entered");
     //Increment Counter
     data=data+1;
-    // Unlock the semaphore
-    sem_post(&y);
- 
+
+    /* cs start */
+    write_unlock(datalock);
+    /* cs end */
+
+
     printf("\nWriter is leaving");
 
 }
+
 int main(void)
 {
     //Threadpool init
@@ -62,13 +53,14 @@ int main(void)
 	threadpool_init(&tinfo, &rq,threadQ);
     set_job(reader,0);
 	set_job(writer,1);
-
+    datalock = lock_init();
     //pthread_t writerthreads[1000];
     //pthread_t readerthreads[1000];
     struct sockaddr_in stSockAddr;
     struct sockaddr_storage serverStorage;
     sem_init(&x, 0, 1);
     sem_init(&y, 0, 1);
+
     int SocketFD = socket(AF_INET,
                             SOCK_STREAM, 0);
  
