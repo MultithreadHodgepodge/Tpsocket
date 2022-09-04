@@ -48,14 +48,13 @@ int main(void)
 	TINFO_t *tinfo;
 	RQ_t *rq;
 	int rq_capacity=1000;
-	int threadQ=1;
+	int threadQ=4;
 	readyqueue_init(&rq,rq_capacity,threadQ);
 	threadpool_init(&tinfo, &rq,threadQ);
     set_job(reader,0);
 	set_job(writer,1);
     datalock = lock_init();
-    //pthread_t writerthreads[1000];
-    //pthread_t readerthreads[1000];
+
     struct sockaddr_in stSockAddr;
     struct sockaddr_storage serverStorage;
     sem_init(&x, 0, 1);
@@ -117,4 +116,3 @@ int main(void)
     close(SocketFD);
     return 0;
 }
-/* Client code in C */

@@ -27,6 +27,8 @@ threadpool: mkbuild $(OBJECT_THPOOL)
 $(OBJECT_THPOOL):$(THPOOL_SOURCE) $(THPOOL_TEST_SOURCE) $(LIST_SOURCE) 
 	$(CC) $(CFLAGS) $@ $^
 runserver:
+	./$(OBJECT_SERVER) 
+runthserver:
 	./$(OBJECT_SERVER_THPOOL)
 runclient:
 	./$(OBJECT_CLIENT)
